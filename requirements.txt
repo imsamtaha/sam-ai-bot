@@ -1,0 +1,5 @@
+FastAPI
+python-telegram-bot
+google-generativeai
+web3
+polygon
