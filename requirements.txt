@@ -1,5 +1,6 @@
-FastAPI
-python-telegram-bot
-google-generativeai
-web3
-polygon
+fastapi>=0.109.0
+python-telegram-bot>=20.0
+google-genai>=1.0.0
+web3>=6.0.0
+python-dotenv>=1.0.0
+uvicorn>=0.27.0

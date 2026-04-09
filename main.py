@@ -1,21 +1,73 @@
+import os
+import asyncio
+import logging
+from contextlib import asynccontextmanager
+from dotenv import load_dotenv
 from fastapi import FastAPI
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-app = FastAPI()
+from app.routes import router
+from app.telegram_bot import create_bot_application
 
-# Initialize the Telegram bot
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text('Hello! This is your Sam AI Bot.')
+# Load environment variables
+load_dotenv()
 
-# Add command handlers
-app.add_handler(CommandHandler('start', start))
+# Set up logging
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifespan events."""
+    logger.info("Starting Sam AI Bot application...")
+    yield
+    logger.info("Shutting down Sam AI Bot application...")
+
+
+# Create FastAPI app
+app = FastAPI(
+    title="Sam AI Bot",
+    description="AI-powered Telegram bot with Google Gemini and Polygon DeFi integration",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# Include routes
+app.include_router(router)
+
 
 @app.get("/")
 async def root():
-    return {'message': 'Sam AI Bot is running!'}
+    """Root endpoint - health check."""
+    return {
+        'status': 'running',
+        'message': 'Sam AI Bot is running!',
+        'version': '1.0.0'
+    }
 
-# Start the FastAPI server
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint."""
+    return {'status': 'healthy'}
+
+
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run(app, host='0.0.0.0', port=8000)
+    
+    # Check if running in webhook mode or polling mode
+    use_webhook = os.getenv('USE_WEBHOOK', 'false').lower() == 'true'
+    
+    if use_webhook:
+        # Run FastAPI server for webhook mode
+        port = int(os.getenv('PORT', 8000))
+        logger.info(f"Starting FastAPI server on port {port} (webhook mode)...")
+        uvicorn.run(app, host='0.0.0.0', port=port)
+    else:
+        # Run Telegram bot in polling mode
+        logger.info("Starting Telegram bot in polling mode...")
+        bot_app = create_bot_application()
+        bot_app.run_polling()

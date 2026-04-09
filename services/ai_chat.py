@@ -1,41 +1,58 @@
 import os
 import logging
-from google.generativeai import gapic
+from dotenv import load_dotenv
+from google import genai
+
+# Load environment variables
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# Configure Gemini API
-os.environ['GOOGLE_GENERATIVE_AI_API_KEY'] = 'AIzaSyBQ3TjXUKbOtLnAiC13MtCmn41w3_k2X2w'
+# Configure Gemini API using environment variable
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 
-# Create chat_with_gemini function
+# Initialize client
+client = None
+if GOOGLE_API_KEY:
+    client = genai.Client(api_key=GOOGLE_API_KEY)
 
-def chat_with_gemini(message):
+
+async def chat_with_gemini(message: str) -> str:
+    """Chat with Google Gemini AI and return the response."""
     try:
-        response = gapic.Chat.create(messages=[{'text': message}])
+        if not client:
+            logger.warning("GOOGLE_API_KEY not set. Please set it in your environment.")
+            return "AI service is not configured. Please set the GOOGLE_API_KEY environment variable."
+        
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=message
+        )
         return response.text
     except Exception as e:
-        logging.error(f"Error chatting with Gemini: {e}")
-        return None
+        logger.error(f"Error chatting with Gemini: {e}")
+        return f"Sorry, I encountered an error: {str(e)}"
 
-# Create analyze_crypto_market function
 
-def analyze_crypto_market():
+async def analyze_crypto_market() -> str:
+    """Analyze the crypto market using AI."""
     try:
-        # Placeholder for market analysis logic
-        logging.info("Analyzing crypto market...")
-        return "Market analysis results"
+        prompt = """Provide a brief analysis of the current cryptocurrency market trends. 
+        Include major coins like Bitcoin and Ethereum, and any significant market movements."""
+        return await chat_with_gemini(prompt)
     except Exception as e:
-        logging.error(f"Error analyzing crypto market: {e}")
-        return None
+        logger.error(f"Error analyzing crypto market: {e}")
+        return f"Error analyzing market: {str(e)}"
 
-# Create generate_trading_advice function
 
-def generate_trading_advice():
+async def generate_trading_advice(crypto: str = "Bitcoin") -> str:
+    """Generate trading advice for a specific cryptocurrency."""
     try:
-        # Placeholder for trading advice logic
-        logging.info("Generating trading advice...")
-        return "Trading advice"
+        prompt = f"""Provide general educational information about {crypto} trading strategies. 
+        Note: This is for educational purposes only and not financial advice."""
+        return await chat_with_gemini(prompt)
     except Exception as e:
-        logging.error(f"Error generating trading advice: {e}")
-        return None
+        logger.error(f"Error generating trading advice: {e}")
+        return f"Error generating advice: {str(e)}"
