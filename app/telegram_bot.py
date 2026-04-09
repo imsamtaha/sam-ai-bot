@@ -39,7 +39,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 /defi - DeFi operations
 /ai <message> - Chat with Gemini AI
 /market - Get crypto market analysis
-/advice - Get trading advice
+/advice [crypto] - Get trading advice
 
 Just type a message and I'll respond with AI-powered insights!
     """

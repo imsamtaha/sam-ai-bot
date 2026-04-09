@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 
 from services.ai_chat import chat_with_gemini, analyze_crypto_market, generate_trading_advice
@@ -21,7 +21,7 @@ class AIRequest(BaseModel):
 
 class MarketRequest(BaseModel):
     """Request model for market analysis."""
-    crypto: Optional[str] = "Bitcoin"
+    crypto: Optional[str] = Field(default="Bitcoin")
 
 
 # Telegram webhook endpoint
@@ -36,7 +36,7 @@ async def telegram_webhook(request: Request):
         return JSONResponse({'status': 'received', 'ok': True})
     except Exception as e:
         logger.error(f"Error processing webhook: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post('/ai/chat')
@@ -50,7 +50,7 @@ async def ai_chat_endpoint(request: AIRequest):
         })
     except Exception as e:
         logger.error(f"Error in AI chat: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to process AI request")
 
 
 @router.get('/ai/market')
@@ -64,7 +64,7 @@ async def ai_market_endpoint():
         })
     except Exception as e:
         logger.error(f"Error in market analysis: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to analyze market")
 
 
 @router.post('/ai/advice')
@@ -79,4 +79,4 @@ async def ai_advice_endpoint(request: MarketRequest):
         })
     except Exception as e:
         logger.error(f"Error generating advice: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to generate advice")
