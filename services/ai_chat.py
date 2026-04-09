@@ -1,7 +1,10 @@
 import os
+import time
 import logging
 from dotenv import load_dotenv
 from google import genai
+
+from services.metrics import record_response_time
 
 # Load environment variables
 load_dotenv()
@@ -25,11 +28,13 @@ async def chat_with_gemini(message: str) -> str:
         if not client:
             logger.warning("GOOGLE_API_KEY not set. Please set it in your environment.")
             return "AI service is not configured. Please set the GOOGLE_API_KEY environment variable."
-        
+
+        start = time.monotonic()
         response = client.models.generate_content(
             model='gemini-2.0-flash',
             contents=message
         )
+        record_response_time('gemini', time.monotonic() - start)
         return response.text
     except Exception as e:
         logger.error(f"Error chatting with Gemini: {e}")

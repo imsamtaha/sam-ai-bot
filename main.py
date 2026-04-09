@@ -1,12 +1,14 @@
 import os
+import time
 import asyncio
 import logging
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 
 from app.routes import router
 from app.telegram_bot import create_bot_application
+from services.metrics import record_request, record_error, record_response_time
 
 # Load environment variables
 load_dotenv()
@@ -37,6 +39,24 @@ app = FastAPI(
 
 # Include routes
 app.include_router(router)
+
+
+@app.middleware('http')
+async def metrics_middleware(request: Request, call_next):
+    """Track request counts and response times for all HTTP endpoints."""
+    endpoint = request.url.path
+    record_request(endpoint)
+    start = time.monotonic()
+    try:
+        response = await call_next(request)
+        if response.status_code >= 500:
+            record_error(endpoint)
+        return response
+    except Exception:
+        record_error(endpoint)
+        raise
+    finally:
+        record_response_time(endpoint, time.monotonic() - start)
 
 
 @app.get("/")

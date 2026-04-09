@@ -82,6 +82,7 @@ When running in webhook mode, the following endpoints are available:
 - `POST /ai/chat` - Chat with AI
 - `GET /ai/market` - Market analysis
 - `POST /ai/advice` - Trading advice
+- `GET /metrics` - Performance metrics (request counts, response times, error rates)
 
 ## Project Structure
 
@@ -96,7 +97,8 @@ sam-ai-bot/
 │   └── telegram_bot.py  # Telegram bot handlers
 └── services/
     ├── __init__.py
-    └── ai_chat.py       # Google Gemini AI integration
+    ├── ai_chat.py       # Google Gemini AI integration
+    └── metrics.py       # Performance metrics tracking
 ```
 
 ## License
