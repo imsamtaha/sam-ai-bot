@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 from services.ai_chat import chat_with_gemini, analyze_crypto_market, generate_trading_advice
+from services.metrics import get_metrics
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -80,3 +81,9 @@ async def ai_advice_endpoint(request: MarketRequest):
     except Exception as e:
         logger.error(f"Error generating advice: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate advice")
+
+
+@router.get('/metrics')
+async def metrics_endpoint():
+    """Expose performance metrics for the bot."""
+    return JSONResponse(get_metrics())
