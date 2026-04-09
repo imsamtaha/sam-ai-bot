@@ -250,12 +250,84 @@ async def network_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle incoming messages with AI response."""
-    user_message = update.message.text
-    logger.info(f"User {update.effective_user.id} sent: {user_message}")
-    
-    response = await chat_with_gemini(user_message)
-    await update.message.reply_text(response)
+    """Handle incoming text messages with AI response."""
+    try:
+        user_message = update.message.text
+        logger.info(f"User {update.effective_user.id} sent: {user_message}")
+
+        response = await chat_with_gemini(user_message)
+        await update.message.reply_text(response)
+    except Exception as e:
+        logger.error(f"Error handling message from user {update.effective_user.id}: {e}")
+        await update.message.reply_text("❌ Sorry, I encountered an error. Please try again.")
+
+
+async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle incoming photo messages."""
+    try:
+        caption = update.message.caption or ""
+        logger.info(f"User {update.effective_user.id} sent a photo. Caption: '{caption}'")
+
+        if caption:
+            await update.message.reply_text("🖼️ Analyzing your question...")
+            response = await chat_with_gemini(
+                f"A user sent a photo along with the following caption or question: '{caption}'. "
+                "Please respond helpfully based on their caption. "
+                "(Note: only the caption text is available, not the image itself.)"
+            )
+            await update.message.reply_text(response)
+        else:
+            await update.message.reply_text(
+                "📸 I received your photo!\n\n"
+                "Send it again with a caption or question and I'll do my best to help. 😊"
+            )
+    except Exception as e:
+        logger.error(f"Error handling photo from user {update.effective_user.id}: {e}")
+        await update.message.reply_text("❌ Sorry, I couldn't process your photo. Please try again.")
+
+
+async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle incoming document messages."""
+    doc = None
+    try:
+        doc = update.message.document
+        caption = update.message.caption or ""
+        logger.info(f"User {update.effective_user.id} sent a document: {doc.file_name}")
+
+        if caption:
+            await update.message.reply_text(
+                f"📄 Received *{doc.file_name}*. Analyzing your question…",
+                parse_mode='Markdown',
+            )
+            response = await chat_with_gemini(
+                f"A user sent a document named '{doc.file_name}' with the following question or message: '{caption}'. "
+                "Please respond helpfully based on their message. "
+                "(Note: only the filename and caption are available, not the document content.)"
+            )
+            await update.message.reply_text(response)
+        else:
+            await update.message.reply_text(
+                f"📄 I received your document: *{doc.file_name}*\n\n"
+                "Send it again with a caption if you'd like me to help with something specific about it.",
+                parse_mode='Markdown',
+            )
+    except Exception as e:
+        filename = doc.file_name if doc else "unknown"
+        logger.error(f"Error handling document '{filename}' from user {update.effective_user.id}: {e}")
+        await update.message.reply_text("❌ Sorry, I couldn't process your document. Please try again.")
+
+
+async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle incoming voice and audio messages."""
+    try:
+        logger.info(f"User {update.effective_user.id} sent a voice/audio message.")
+        await update.message.reply_text(
+            "🎙️ I received your voice message!\n\n"
+            "I'm not able to transcribe audio yet — please type your message and I'll be happy to help. 😊"
+        )
+    except Exception as e:
+        logger.error(f"Error handling voice message from user {update.effective_user.id}: {e}")
+        await update.message.reply_text("❌ Sorry, I couldn't process your voice message.")
 
 
 def create_bot_application() -> Application:
@@ -279,8 +351,13 @@ def create_bot_application() -> Application:
     application.add_handler(CommandHandler('automate', automate_command))
     application.add_handler(CommandHandler('network', network_command))
     
-    # Register message handler for non-command messages
+    # Register message handler for non-command text messages
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    # Register media handlers
+    application.add_handler(MessageHandler(filters.PHOTO, handle_photo))
+    application.add_handler(MessageHandler(filters.Document.ALL, handle_document))
+    application.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, handle_voice))
 
     return application
 

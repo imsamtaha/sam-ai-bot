@@ -3,6 +3,7 @@ from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import Optional
+from telegram import Update
 
 from services.ai_chat import chat_with_gemini, analyze_crypto_market, generate_trading_advice
 from services.blockchain import get_wallet_portfolio, get_network_info, is_valid_address
@@ -58,14 +59,20 @@ class AutomateRequest(BaseModel):
 @router.post('/webhook')
 async def telegram_webhook(request: Request):
     """Handle incoming Telegram webhook updates."""
+    bot_app = getattr(request.app.state, 'bot_app', None)
+    if bot_app is None:
+        logger.error("Bot application not initialised — webhook updates cannot be processed")
+        raise HTTPException(status_code=503, detail="Bot not initialised")
     try:
         data = await request.json()
-        logger.info(f"Received webhook data: {data}")
-        # Process the incoming Telegram update here
-        # This will be integrated with the bot application
-        return JSONResponse({'status': 'received', 'ok': True})
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid webhook payload format")
+    try:
+        update = Update.de_json(data, bot_app.bot)
+        await bot_app.process_update(update)
+        return JSONResponse({'ok': True})
     except Exception as e:
-        logger.error(f"Error processing webhook: {e}")
+        logger.error(f"Error processing webhook update: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
