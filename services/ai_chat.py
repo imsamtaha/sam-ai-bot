@@ -33,7 +33,7 @@ async def chat_with_gemini(message: str) -> str:
         return response.text
     except Exception as e:
         logger.error(f"Error chatting with Gemini: {e}")
-        return f"Sorry, I encountered an error: {str(e)}"
+        return "Sorry, I encountered an error processing your request. Please try again later."
 
 
 async def analyze_crypto_market() -> str:
@@ -44,7 +44,7 @@ async def analyze_crypto_market() -> str:
         return await chat_with_gemini(prompt)
     except Exception as e:
         logger.error(f"Error analyzing crypto market: {e}")
-        return f"Error analyzing market: {str(e)}"
+        return "Error analyzing market. Please try again later."
 
 
 async def generate_trading_advice(crypto: str = "Bitcoin") -> str:
@@ -55,4 +55,4 @@ async def generate_trading_advice(crypto: str = "Bitcoin") -> str:
         return await chat_with_gemini(prompt)
     except Exception as e:
         logger.error(f"Error generating trading advice: {e}")
-        return f"Error generating advice: {str(e)}"
+        return "Error generating advice. Please try again later."
