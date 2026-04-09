@@ -1,14 +1,19 @@
 # Sam AI Bot
 
-An AI-powered Telegram bot built with Google Gemini AI and Polygon DeFi integration.
+An AI-driven blockchain automation ecosystem built on Telegram, powered by Google Gemini AI and Polygon DeFi.
 
 ## Features
 
-- 🤖 **Google Gemini AI Integration** - Chat with advanced AI for insights and assistance
-- 📊 **Crypto Market Analysis** - Get AI-powered market analysis
-- 💡 **Trading Advice** - Receive educational trading information
-- 💼 **Wallet Integration** - Connect your Polygon wallet (coming soon)
-- 🏦 **DeFi Operations** - Swap tokens and manage DeFi activities (coming soon)
+- 🤖 **Google Gemini AI Integration** — Chat with advanced AI for insights and assistance
+- 📊 **Crypto Market Analysis** — AI-powered market analysis
+- 💡 **Trading Advice** — Educational trading information
+- 💼 **Wallet Portfolio** — View on-chain balances on Polygon (MATIC + ERC-20 tokens)
+- 📈 **AI Portfolio Analysis** — Gemini-powered analysis of any Polygon wallet
+- 🔄 **Swap Guidance** — AI explanation of token swaps across Polygon DEXs
+- 🏦 **DeFi Protocols** — Information on QuickSwap, Aave, Uniswap v3, Curve, Balancer and more
+- 🧠 **DeFi Strategy** — AI-generated strategy tailored to your risk profile
+- ⚙️ **Blockchain Automation** — Natural-language task planning (e.g. "stake my MATIC")
+- 🌐 **Network Status** — Live Polygon network and gas-price info
 
 ## Setup
 
@@ -68,20 +73,39 @@ python -m app.telegram_bot
 | `/help` | Show help message |
 | `/ai <message>` | Chat with Gemini AI |
 | `/market` | Get crypto market analysis |
-| `/advice [crypto]` | Get trading advice |
-| `/wallet` | Check your wallet |
-| `/defi` | DeFi operations |
+| `/advice [crypto]` | Get educational trading information |
+| `/wallet <address>` | View Polygon wallet portfolio |
+| `/portfolio <address>` | AI analysis of a wallet |
+| `/network` | Polygon network status |
+| `/defi` | List DeFi protocols on Polygon |
+| `/swap <amount> <FROM> <TO>` | AI swap guidance |
+| `/strategy [risk]` | AI DeFi strategy (conservative/moderate/aggressive) |
+| `/automate <task>` | AI-powered blockchain automation plan |
 
 ## API Endpoints
 
-When running in webhook mode, the following endpoints are available:
+When running in webhook mode the following endpoints are available:
 
-- `GET /` - Health check
-- `GET /health` - Health status
-- `POST /webhook` - Telegram webhook endpoint
-- `POST /ai/chat` - Chat with AI
-- `GET /ai/market` - Market analysis
-- `POST /ai/advice` - Trading advice
+### General
+- `GET /` — Health check
+- `GET /health` — Health status
+- `POST /webhook` — Telegram webhook endpoint
+
+### AI
+- `POST /ai/chat` — Chat with Gemini AI
+- `GET /ai/market` — Market analysis
+- `POST /ai/advice` — Trading advice
+
+### Blockchain
+- `GET /blockchain/network` — Polygon network status
+- `GET /blockchain/wallet/{address}` — On-chain portfolio
+- `POST /blockchain/portfolio/analyze` — AI portfolio analysis
+
+### DeFi
+- `GET /defi/protocols` — List DeFi protocols
+- `POST /defi/swap` — Swap guidance
+- `POST /defi/strategy` — DeFi strategy
+- `POST /defi/automate` — Blockchain automation plan
 
 ## Project Structure
 
@@ -92,11 +116,13 @@ sam-ai-bot/
 ├── .env.example         # Environment variables template
 ├── app/
 │   ├── __init__.py
-│   ├── routes.py        # FastAPI routes
+│   ├── routes.py        # FastAPI routes (AI + Blockchain + DeFi)
 │   └── telegram_bot.py  # Telegram bot handlers
 └── services/
     ├── __init__.py
-    └── ai_chat.py       # Google Gemini AI integration
+    ├── ai_chat.py        # Google Gemini AI integration
+    ├── blockchain.py     # Web3 / Polygon wallet service
+    └── defi.py           # DeFi operations & AI automation
 ```
 
 ## License
