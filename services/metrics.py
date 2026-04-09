@@ -71,12 +71,12 @@ def get_metrics() -> Dict[str, Any]:
                 'max_response_time_ms': round(max_ms, 2) if max_ms is not None else None,
             }
 
-    return {
-        'uptime_seconds': round(uptime, 2),
-        'total_requests': total_requests,
-        'total_errors': total_errors,
-        'error_rate': round(
-            total_errors / total_requests, _ERROR_RATE_PRECISION
-        ) if total_requests > 0 else 0.0,
-        'endpoints': per_endpoint,
-    }
+        return {
+            'uptime_seconds': round(uptime, 2),
+            'total_requests': total_requests,
+            'total_errors': total_errors,
+            'error_rate': round(
+                total_errors / total_requests, _ERROR_RATE_PRECISION
+            ) if total_requests > 0 else 0.0,
+            'endpoints': per_endpoint,
+        }
