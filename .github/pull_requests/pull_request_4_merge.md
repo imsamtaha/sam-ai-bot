@@ -1,0 +1,1 @@
+Merged pull request #4 and resolved any conflicts.
