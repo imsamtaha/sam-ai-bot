@@ -1,0 +1,1 @@
+version: '3.8'\nservices:\n  bot:\n    build: .\n    ports:\n      - "8000:8000"\n    environment:\n      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}\n      GOOGLE_API_KEY: ${GOOGLE_API_KEY}\n      POLYGON_RPC_URL: ${POLYGON_RPC_URL}\n    env_file:\n      - .env\n    restart: unless-stopped
