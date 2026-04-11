@@ -1,4 +1,6 @@
-name: Deploy to Production
+# Deployment Workflow
+
+name: Deploy
 
 on:
   push:
@@ -6,30 +8,35 @@ on:
       - main
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up Docker BuildKit
-        run: |
-          export DOCKER_BUILDKIT=1
+    - name: Log in to Docker Hub
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
 
-      - name: Build Docker Image
-        run: |
-          docker build -t my-docker-image:latest .
+    - name: Build Docker image
+      run: |
+        docker build -t my-image:latest .
 
-      - name: Log in to Container Registry
-        run: |
-          echo ${CONTAINER_REGISTRY_PASSWORD} | docker login ${CONTAINER_REGISTRY} -u ${CONTAINER_REGISTRY_USERNAME} --password-stdin
+    - name: Verify Docker image
+      run: |
+        docker run --rm my-image:latest
 
-      - name: Push Docker Image
-        run: |
-          docker push my-docker-image:latest
+    - name: Push Docker image to Registry
+      run: |
+        docker tag my-image:latest my-docker-repo/my-image:latest
+        docker push my-docker-repo/my-image:latest
 
-      - name: Deploy to Cloud Provider
-        run: |
-          # Insert your cloud provider deployment command here
-          echo 'Deploying to cloud provider'
+    - name: Deployment Instructions
+      run: |
+        echo "# Deployment Instructions"
+        echo "Set up your Docker Hub credentials in GitHub Secrets as DOCKER_USERNAME and DOCKER_PASSWORD."
+        echo "Ensure that your Docker repository is 'my-docker-repo' and update with your details if necessary."
