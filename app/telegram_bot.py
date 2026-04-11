@@ -1,4 +1,5 @@
 import os
+import re
 import logging
 from dotenv import load_dotenv
 from telegram import Update
@@ -250,10 +251,56 @@ async def network_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handle incoming messages with AI response."""
+    """Handle incoming messages with smart intent detection and AI response."""
     user_message = update.message.text
     logger.info(f"User {update.effective_user.id} sent: {user_message}")
-    
+
+    # --- Intent: Polygon wallet address detected ---
+    address_match = re.search(r'\b(0x[a-fA-F0-9]{40})\b', user_message)
+    if address_match:
+        address = address_match.group(1)
+        if is_valid_address(address):
+            await update.message.reply_text(
+                f"🔍 I spotted a Polygon wallet address. Fetching portfolio…"
+            )
+            portfolio = get_wallet_portfolio(address)
+            await update.message.reply_text(
+                format_portfolio_message(portfolio),
+                parse_mode='Markdown',
+            )
+            return
+
+    # --- Intent: swap / trade request ---
+    swap_pattern = re.compile(
+        r'\b(swap|exchange|convert|trade)\b.*?\b(\d[\d.,]*)\s*([a-zA-Z]{1,10})\b.*?\b([a-zA-Z]{1,10})\b',
+        re.IGNORECASE,
+    )
+    swap_match = swap_pattern.search(user_message)
+    if swap_match:
+        try:
+            amount = float(swap_match.group(2).replace(',', ''))
+            from_token = swap_match.group(3)
+            to_token = swap_match.group(4)
+            await update.message.reply_text(
+                f"🔄 Analyzing swap of {amount} {from_token.upper()} → {to_token.upper()}…"
+            )
+            info = await get_swap_info(from_token, to_token, amount)
+            await update.message.reply_text(f"🔄 *Swap Info:*\n\n{info}", parse_mode='Markdown')
+            return
+        except (ValueError, IndexError):
+            pass  # Fall through to AI response
+
+    # --- Intent: market / price inquiry ---
+    market_keywords = re.compile(
+        r'\b(market|price|btc|eth|bitcoin|ethereum|matic|crypto|bull|bear|chart|trend)\b',
+        re.IGNORECASE,
+    )
+    if market_keywords.search(user_message):
+        response = await chat_with_gemini(user_message)
+        await update.message.reply_text(response)
+        return
+
+    # --- Default: general AI response ---
     response = await chat_with_gemini(user_message)
     await update.message.reply_text(response)
 
