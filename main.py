@@ -23,7 +23,32 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Manage application lifespan events."""
     logger.info("Starting Sam AI Bot application...")
+    use_webhook = os.getenv('USE_WEBHOOK', 'false').lower() == 'true'
+    telegram_application = None
+
+    if use_webhook:
+        telegram_application = create_bot_application()
+        await telegram_application.initialize()
+        await telegram_application.start()
+
+        webhook_base_url = os.getenv('TELEGRAM_WEBHOOK_URL', '').strip()
+        if webhook_base_url:
+            webhook_url = f"{webhook_base_url.rstrip('/')}/webhook"
+            await telegram_application.bot.set_webhook(url=webhook_url)
+            logger.info(f"Telegram webhook configured: {webhook_url}")
+        else:
+            logger.warning(
+                "TELEGRAM_WEBHOOK_URL is not set. Configure the Telegram webhook URL manually."
+            )
+
+        app.state.telegram_application = telegram_application
+
     yield
+
+    if telegram_application is not None:
+        await telegram_application.stop()
+        await telegram_application.shutdown()
+
     logger.info("Shutting down Sam AI Bot application...")
 
 
