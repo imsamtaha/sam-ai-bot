@@ -59,16 +59,29 @@ class AutomateRequest(BaseModel):
 @router.post('/webhook')
 async def telegram_webhook(request: Request):
     """Handle incoming Telegram webhook updates."""
-    telegram_application = getattr(request.app.state, 'telegram_application', None)
+    telegram_application = getattr(
+        request.app.state,
+        'telegram_application',
+        None,
+    )
     if telegram_application is None:
-        raise HTTPException(status_code=503, detail="Telegram bot is not initialized")
+        raise HTTPException(
+            status_code=503,
+            detail="Telegram bot is not initialized",
+        )
 
     try:
         data = await request.json()
         update = Update.de_json(data, telegram_application.bot)
         if update is not None:
             await telegram_application.process_update(update)
-        return JSONResponse({'status': 'received', 'ok': True})
+            return JSONResponse({'status': 'processed', 'ok': True})
+
+        logger.warning(
+            "Received webhook payload that could not be parsed as Telegram Update. Keys: %s",
+            list(data.keys()) if isinstance(data, dict) else type(data).__name__,
+        )
+        return JSONResponse({'status': 'ignored', 'ok': True})
     except Exception as e:
         logger.error(f"Error processing webhook: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")

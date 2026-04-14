@@ -1,5 +1,4 @@
 import os
-import asyncio
 import logging
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
@@ -38,7 +37,8 @@ async def lifespan(app: FastAPI):
             logger.info(f"Telegram webhook configured: {webhook_url}")
         else:
             logger.warning(
-                "TELEGRAM_WEBHOOK_URL is not set. Configure the Telegram webhook URL manually."
+                "TELEGRAM_WEBHOOK_URL is not set. "
+                "Configure the Telegram webhook URL manually."
             )
 
         app.state.telegram_application = telegram_application
@@ -82,10 +82,10 @@ async def health_check():
 
 if __name__ == '__main__':
     import uvicorn
-    
+
     # Check if running in webhook mode or polling mode
     use_webhook = os.getenv('USE_WEBHOOK', 'false').lower() == 'true'
-    
+
     if use_webhook:
         # Run FastAPI server for webhook mode
         port = int(os.getenv('PORT', 8000))
