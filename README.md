@@ -14,6 +14,7 @@ An AI-driven blockchain automation ecosystem built on Telegram, powered by Googl
 - 🧠 **DeFi Strategy** — AI-generated strategy tailored to your risk profile
 - ⚙️ **Blockchain Automation** — Natural-language task planning (e.g. "stake my MATIC")
 - 🌐 **Network Status** — Live Polygon network and gas-price info
+- 📉 **Performance Metrics** — Request counts, response times, and error rates via `/metrics`
 
 ## Setup
 
@@ -107,6 +108,9 @@ When running in webhook mode the following endpoints are available:
 - `POST /defi/strategy` — DeFi strategy
 - `POST /defi/automate` — Blockchain automation plan
 
+### Metrics
+- `GET /metrics` — Performance metrics (request counts, response times, error rates)
+
 ## Project Structure
 
 ```
@@ -122,7 +126,8 @@ sam-ai-bot/
     ├── __init__.py
     ├── ai_chat.py        # Google Gemini AI integration
     ├── blockchain.py     # Web3 / Polygon wallet service
-    └── defi.py           # DeFi operations & AI automation
+    ├── defi.py           # DeFi operations & AI automation
+    └── metrics.py        # Performance metrics tracking
 ```
 
 ## License

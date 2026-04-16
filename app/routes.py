@@ -13,6 +13,7 @@ from services.defi import (
     get_swap_info,
     list_protocols,
 )
+from services.metrics import get_metrics
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -209,3 +210,9 @@ async def defi_automate_endpoint(request: AutomateRequest):
     except Exception as e:
         logger.error(f"Error generating automation plan: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate automation plan")
+
+
+@router.get('/metrics')
+async def metrics_endpoint():
+    """Expose performance metrics for the bot."""
+    return JSONResponse(get_metrics())
