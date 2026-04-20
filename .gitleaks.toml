@@ -1,0 +1,10 @@
+# gitleaks configuration — https://github.com/gitleaks/gitleaks
+# Detects secrets accidentally committed to the repository.
+
+title = "Sam AI Bot gitleaks config"
+
+[allowlist]
+  # .env.example contains only placeholder values, not real secrets
+  paths = [
+    '''\.env\.example$''',
+  ]
