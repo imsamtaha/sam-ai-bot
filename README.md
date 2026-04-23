@@ -95,6 +95,7 @@ When running in webhook mode the following endpoints are available:
 - `POST /ai/chat` — Chat with Gemini AI
 - `GET /ai/market` — Market analysis
 - `POST /ai/advice` — Trading advice
+- `GET /metrics` — Performance metrics (request counts, response times, error rates)
 
 ### Blockchain
 - `GET /blockchain/network` — Polygon network status
@@ -122,7 +123,8 @@ sam-ai-bot/
     ├── __init__.py
     ├── ai_chat.py        # Google Gemini AI integration
     ├── blockchain.py     # Web3 / Polygon wallet service
-    └── defi.py           # DeFi operations & AI automation
+    ├── defi.py           # DeFi operations & AI automation
+    └── metrics.py        # Performance metrics tracking
 ```
 
 ## License
