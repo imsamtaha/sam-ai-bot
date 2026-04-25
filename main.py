@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
     telegram_application = None
 
     if use_webhook:
-        webhook_secret = os.getenv('TELEGRAM_WEBHOOK_SECRET', '').strip()
+        webhook_secret = os.getenv('TELEGRAM_WEBHOOK_SECRET')
         if not webhook_secret:
             raise ValueError(
                 "TELEGRAM_WEBHOOK_SECRET environment variable must be set when USE_WEBHOOK=true"
