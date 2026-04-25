@@ -1,4 +1,5 @@
 import logging
+import hmac
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
@@ -64,10 +65,30 @@ async def telegram_webhook(request: Request):
         'telegram_application',
         None,
     )
+    webhook_secret = getattr(
+        request.app.state,
+        'telegram_webhook_secret',
+        None,
+    )
     if telegram_application is None:
         raise HTTPException(
             status_code=503,
             detail="Telegram bot is not initialized",
+        )
+    if not webhook_secret:
+        raise HTTPException(
+            status_code=503,
+            detail="Telegram webhook security token is not configured",
+        )
+
+    incoming_secret = request.headers.get(
+        "X-Telegram-Bot-Api-Secret-Token",
+        "",
+    )
+    if not hmac.compare_digest(incoming_secret, webhook_secret):
+        raise HTTPException(
+            status_code=403,
+            detail="Invalid webhook secret token",
         )
 
     try:

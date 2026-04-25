@@ -26,6 +26,12 @@ async def lifespan(app: FastAPI):
     telegram_application = None
 
     if use_webhook:
+        webhook_secret = os.getenv('TELEGRAM_WEBHOOK_SECRET', '').strip()
+        if not webhook_secret:
+            raise ValueError(
+                "TELEGRAM_WEBHOOK_SECRET environment variable must be set when USE_WEBHOOK=true"
+            )
+
         telegram_application = create_bot_application()
         await telegram_application.initialize()
         await telegram_application.start()
@@ -33,7 +39,10 @@ async def lifespan(app: FastAPI):
         webhook_base_url = os.getenv('TELEGRAM_WEBHOOK_URL', '').strip()
         if webhook_base_url:
             webhook_url = f"{webhook_base_url.rstrip('/')}/webhook"
-            await telegram_application.bot.set_webhook(url=webhook_url)
+            await telegram_application.bot.set_webhook(
+                url=webhook_url,
+                secret_token=webhook_secret,
+            )
             logger.info(f"Telegram webhook configured: {webhook_url}")
         else:
             logger.warning(
@@ -42,6 +51,7 @@ async def lifespan(app: FastAPI):
             )
 
         app.state.telegram_application = telegram_application
+        app.state.telegram_webhook_secret = webhook_secret
 
     yield
 

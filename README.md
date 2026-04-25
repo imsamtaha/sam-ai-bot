@@ -60,7 +60,9 @@ python main.py
 USE_WEBHOOK=true python main.py
 ```
 
-When using webhook mode, also set `TELEGRAM_WEBHOOK_URL` in `.env` to your public HTTPS base URL (the bot will register `${TELEGRAM_WEBHOOK_URL}/webhook` automatically).
+When using webhook mode, set both:
+- `TELEGRAM_WEBHOOK_URL` to your public HTTPS base URL (the bot registers `${TELEGRAM_WEBHOOK_URL}/webhook` automatically)
+- `TELEGRAM_WEBHOOK_SECRET` to a long random value used to verify Telegram webhook requests
 
 Or run just the Telegram bot:
 ```bash
